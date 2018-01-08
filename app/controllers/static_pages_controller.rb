@@ -3,7 +3,9 @@ class StaticPagesController < ApplicationController
     if logged_in?
       @micropost  = current_user.microposts.build
       if params[:q]
-        @feed_items = Micropost.search_by_keyword(params[:q])
+        relation = Micropost.joins(:user)
+        @feed_items = relation.merge(User.search_by_keyword(params[:q]))
+                        .or(relation.search_by_keyword(params[:q]))
                         .paginate(page: params[:page])
       else
         @feed_items = current_user.feed.paginate(page: params[:page])
